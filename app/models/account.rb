@@ -1,5 +1,6 @@
 class Account < ApplicationRecord
   belongs_to :user
+  has_many :transactions
 
   accepts_nested_attributes_for :user, reject_if: :all_blank
 
