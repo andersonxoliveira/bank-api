@@ -29,11 +29,9 @@ class TransactionsController < ApplicationController
     if !check_transaction
       render json: { message: "Usuário não possui saldo suficiente para operação!"}, status: :ok
     elsif @transaction.save
-
-
       score = if @transaction.transaction_type == "deposit"
         @account.score+@transaction.value
-      elsif @transaction.transaction_type == :withdrawal
+      elsif @transaction.transaction_type == "withdrawal"
         @account.score-@transaction.value
       else
         @transaction.destination_account.update(score: @transaction.destination_account.score+@transaction.value)
@@ -62,7 +60,11 @@ class TransactionsController < ApplicationController
       else
         7
       end
-      rate = rate + 10 if self.value > 1000
+      if @transaction.value > 1000
+        rate + 10
+      else
+        rate
+      end
     else
       0
     end
