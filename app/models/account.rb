@@ -2,7 +2,7 @@ class Account < ApplicationRecord
   belongs_to :user
   has_many :transactions
   accepts_nested_attributes_for :user, reject_if: :all_blank
-  before_validation :set_intial_values
+  before_create :set_intial_values
 
   enum status: {
     active: 0,
