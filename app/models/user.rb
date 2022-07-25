@@ -8,6 +8,7 @@ class User < ActiveRecord::Base
   include DeviseTokenAuth::Concerns::User
 
   has_one :account
+  has_many :transactions, through: :account
   before_validation :set_user_type
 
   enum user_type: {

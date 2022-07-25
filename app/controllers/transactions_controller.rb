@@ -5,11 +5,28 @@ class TransactionsController < ApplicationController
 
   # GET /transactions
   def index
-    @transactions = if params[:filter]
-      Transaction.where(request.query_parameters[:filter])
+
+    @transactions = if @user_type
+      if params[:filter]
+        Transaction.where(request.query_parameters[:filter])
+      else
+        Transaction.all
+      end
     else
-      Transaction.all
+      if params[:filter]
+        if params[:filter][:initial_date] && params[:filter][:end_date]
+          filter = request.query_parameters[:filter]
+          initial_date = DateTime.parse(filter[:initial_date]).beginning_of_day
+          end_date = DateTime.parse(filter[:end_date]).end_of_day
+          current_user.transactions.where('transactions.created_at BETWEEN ? AND ?', initial_date, end_date)
+        else
+          current_user.transactions.where(request.query_parameters[:filter])
+        end
+      else
+        current_user.transactions
+      end
     end
+
     render json: TransactionSerializer.new(@transactions).serializable_hash
   end
 
@@ -49,6 +66,10 @@ class TransactionsController < ApplicationController
   end
 
   private
+
+  def check_user_type
+    @user_type = ([current_user.user_type] & ['admin', 'dba']).present? ? true : false
+  end
 
   def set_rate
     if @transaction.transaction_type == "transfers_between_accounts"
